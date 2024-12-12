@@ -2,19 +2,47 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // useNavigationを呼び出す
 
-  const handleLogin = (): void => {
-    // ログインロジック（仮実装）
-    if (email === 'test@example.com' && password === 'password123') {
-      Alert.alert('成功', 'ログインに成功しました');
-      navigation.navigate('HomeScreen' as never);
-    } else {
-      Alert.alert('エラー', 'メールアドレスまたはパスワードが間違っています');
+  const handleLogin = async (): Promise<void> => {
+    if (!email || !password) {
+      Alert.alert('エラー', 'すべてのフィールドを入力してください');
+      return;
+    }
+
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        Alert.alert('エラー', 'メールアドレスが登録されていません');
+        return;
+      }
+
+      let isAuthenticated = false;
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        if (userData.password === password) {
+          isAuthenticated = true;
+        }
+      });
+
+      if (isAuthenticated) {
+        Alert.alert('成功', 'ログインに成功しました');
+        navigation.navigate('screens/HomeScreen' as never);
+      } else {
+        Alert.alert('エラー', 'パスワードが間違っています');
+      }
+    } catch (error) {
+      console.error('Error during login: ', error);
+      Alert.alert('エラー', 'ログイン中にエラーが発生しました');
     }
   };
 
@@ -30,7 +58,7 @@ const LoginScreen: React.FC = () => {
         '成功',
         `ようこそ、${credential.fullName?.givenName || 'ユーザー'}さん`
       );
-      navigation.navigate('HomeScreen' as never);
+      navigation.navigate('screens/HomeScreen' as never);
     } catch (error) {
       console.error('Apple sign-in error:', error);
       Alert.alert('エラー', 'Appleログインに失敗しました');
@@ -68,7 +96,7 @@ const LoginScreen: React.FC = () => {
         onPress={handleAppleLogin}
       />
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignupScreen' as never)}>
+      <TouchableOpacity onPress={() => navigation.navigate('screens/SignupScreen' as never)}>
         <Text style={styles.signupText}>アカウントを作成する</Text>
       </TouchableOpacity>
     </View>

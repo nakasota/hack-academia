@@ -28,7 +28,7 @@ const SignupScreen: React.FC = () => {
       });
 
       Alert.alert('成功', 'アカウントが作成されました');
-      navigation.navigate('LoginScreen' as never);
+      navigation.navigate('screens/LoginScreen' as never);
     } catch (error) {
       console.error('Error adding document: ', error);
       Alert.alert('エラー', 'アカウント作成中にエラーが発生しました');
