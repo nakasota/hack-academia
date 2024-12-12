@@ -8,14 +8,11 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+      "jsEngine": "hermes"
+    },
+    "ios": {
+      "jsEngine": "hermes"
     },
     "web": {
       "bundler": "metro",
